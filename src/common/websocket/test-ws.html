@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form onsubmit="return false;">
+    <input id="input"/>
+    <button type="button" onClick="sendConnect()" class="btn">连接</button>
+    <button type="button" onClick="sendDisconnect()" class="btn">断开</button>
+    <button type="button" onClick="sendMessage()" class="btn">发送</button>
+</form>
+<div id="msgList">
+
+</div>
+</body>
+</html>
+<!--<script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-y/socket.io/2.1.0/socket.io.js"></script>-->
+<script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-y/socket.io/4.2.0/socket.io.js" type="application/javascript"></script>
+<script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-y/axios/0.26.0/axios.min.js"></script>
+<script>
+    const token = 'user' + Math.floor((Math.random() * 1000) + 1);
+    //const url = `ws://localhost:8089?token=${token}`;
+    const url = `http://localhost:3002`;
+    const socket = io.connect(url);
+    console.log("load")
+    socket.on('connect', function () {
+        console.log("connect success")
+        append("msgList", `<div>connect success</div>`)
+    });
+    socket.on('push', function (data) {
+        console.log(data)
+        append("msgList", `<div>${data}</div>`)
+    });
+    socket.on('disconnect', function () {
+        console.log("disconnect success")
+        append("msgList", `<div>disconnect success</div>`)
+    });
+
+    socket.on('message', function (data) {
+        append("msgList", `<div>${data}</div>`)
+    });
+    let inputText = ''
+    function sendMessage(){
+        socket.emit('message',inputText)
+    }
+
+    function sendConnect() {
+        socket.connect();
+    }
+
+    function sendDisconnect() {
+        socket.disconnect();
+    }
+
+    const input = document.querySelector('#input')
+    input.addEventListener('change',function (e){
+        inputText = e.target.value
+    })
+
+    function append(domId, data) {
+        const dom = document.querySelector('#' + domId)
+        const container = document.createElement('template')
+        container.innerHTML = data
+        const insert = container.content.firstChild
+        dom.append(insert)
+    }
+</script>
